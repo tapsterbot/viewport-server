@@ -1,14 +1,20 @@
-var express = require('express');
-var { Server } = require('ws');
+const express = require('express');
+const basicAuth = require('express-basic-auth')
+const { Server } = require('ws')
 
-const PORT = process.env.PORT || 3000;
-const INDEX = '/static/index.html';
+const PORT = process.env.PORT || 3000
+const INDEX = '/static/index.html'
 
-var app = express()
+const app = express()
+app.use(basicAuth({
+    users: { 'someuser': 'somepassword' },
+    challenge: true,
+    realm: 'Imb4T3st4pp',
+}))
 app.use(express.static('static'))
 
-var server = app.listen(PORT, () => console.log(`Listening on ${PORT}`));
-var wss = new Server({ server });
+const server = app.listen(PORT, () => console.log(`Listening on ${PORT}`))
+const wss = new Server({ server });
 
 
 wss.on('connection', (ws) => {
