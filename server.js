@@ -1,16 +1,15 @@
-'use strict';
-
-const express = require('express');
-const { Server } = require('ws');
+var express = require('express');
+var { Server } = require('ws');
 
 const PORT = process.env.PORT || 3000;
-const INDEX = '/index.html';
+const INDEX = '/static/index.html';
 
-const server = express()
-  .use((req, res) => res.sendFile(INDEX, { root: __dirname }))
-  .listen(PORT, () => console.log(`Listening on ${PORT}`));
+var app = express()
+app.use(express.static('static'))
 
-const wss = new Server({ server });
+var server = app.listen(PORT, () => console.log(`Listening on ${PORT}`));
+var wss = new Server({ server });
+
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
@@ -22,3 +21,4 @@ setInterval(() => {
     client.send(new Date().toTimeString());
   });
 }, 1000);
+
