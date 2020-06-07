@@ -15,10 +15,13 @@
             el.innerHTML = 'Server time: ' + msg.data;
           } 
           else if (msg.type == 'image') {
-            console.log('Received Image!')
             imageElem = document.getElementById('live-stream');
             if (imageElem) {
-              imageElem.src = `data:image/jpeg;base64,${msg.data}`
+              if (msg.data.length != 0) {
+                 imageElem.src = `data:image/jpeg;base64,${msg.data}`
+              } else {
+                imageElem.src = ""
+              }
             }
           }
     
