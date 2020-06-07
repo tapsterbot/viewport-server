@@ -1,19 +1,37 @@
 <html>
   <head>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Open+Sans" />
+    <style>
+      body {
+        margin:0px;
+      }
+      img {
+        width: 100%;
+        height: auto;
+      }
+      p {
+        margin-left: 5px;
+        margin-top: 5px;
+        font-family: "Open Sans";
+        font-size: 10px;
+        font-weight: 700;
+        text-align: left;
+      }
+    </style>
     <script>
       let HOST = location.origin.replace(/^http/, 'ws')
       let ws = new WebSocket(HOST);
       let el;
 
-      ws.onmessage = (event) => {        
+      ws.onmessage = (event) => {
         try {
           var msg = JSON.parse(event.data)
-    
+
           if (msg.type == 'date') {
             console.log('Received Date: ' + msg.data)
             el = document.getElementById('server-time');
             el.innerHTML = 'Server time: ' + msg.data;
-          } 
+          }
           else if (msg.type == 'image') {
             imageElem = document.getElementById('live-stream');
             if (imageElem) {
@@ -24,16 +42,16 @@
               }
             }
           }
-    
+
         } catch(err) {
-    
-        }      
-        
+
+        }
+
       }
     </script>
   </head>
   <body>
-    <p id="server-time"></p>
     <img id="live-stream" src="">
+    <p id="server-time"></p>
   </body>
 </html>
