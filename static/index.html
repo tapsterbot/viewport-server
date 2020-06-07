@@ -18,7 +18,7 @@
             console.log('Received Image!')
             imageElem = document.getElementById('live-stream');
             if (imageElem) {
-              imageElem.src = `data:image/png;base64,${msg.data}`
+              imageElem.src = `data:image/jpeg;base64,${msg.data}`
             }
           }
     
