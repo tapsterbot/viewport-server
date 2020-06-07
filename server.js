@@ -20,11 +20,34 @@ const wss = new Server({ server });
 wss.on('connection', (ws) => {
   console.log('Client connected');
   ws.on('close', () => console.log('Client disconnected'));
-});
+
+  ws.on('message', function incoming(message) {
+      try {
+        var msg = JSON.parse(message)
+
+        if (msg.type == 'message') {
+          console.log('Received Message: ' + msg.data)
+        }
+
+        else if (msg.type == 'image') {
+          console.log('Received Image: ')
+
+          wss.clients.forEach((client) => {
+            client.send(JSON.stringify({'type': 'image', 'data': msg.data}));
+          })
+
+        }
+
+      } catch(err) {
+
+      }
+  })
+
+})
 
 setInterval(() => {
   wss.clients.forEach((client) => {
-    client.send(new Date().toTimeString());
+    client.send(JSON.stringify({'type': 'date', 'data': new Date().toTimeString()}));
   });
 }, 1000);
 

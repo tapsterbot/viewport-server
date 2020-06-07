@@ -5,13 +5,32 @@
       let ws = new WebSocket(HOST);
       let el;
 
-      ws.onmessage = (event) => {
-        el = document.getElementById('server-time');
-        el.innerHTML = 'Server time: ' + event.data;
-      };
+      ws.onmessage = (event) => {        
+        try {
+          var msg = JSON.parse(event.data)
+    
+          if (msg.type == 'date') {
+            console.log('Received Date: ' + msg.data)
+            el = document.getElementById('server-time');
+            el.innerHTML = 'Server time: ' + msg.data;
+          } 
+          else if (msg.type == 'image') {
+            console.log('Received Image!')
+            imageElem = document.getElementById('live-stream');
+            if (imageElem) {
+              imageElem.src = `data:image/png;base64,${msg.data}`
+            }
+          }
+    
+        } catch(err) {
+    
+        }      
+        
+      }
     </script>
   </head>
   <body>
     <p id="server-time"></p>
+    <img id="live-stream" src="">
   </body>
 </html>
