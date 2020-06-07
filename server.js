@@ -33,7 +33,7 @@ wss.on('connection', (ws) => {
           console.log('Received Image: ')
 
           wss.clients.forEach((client) => {
-            client.send(JSON.stringify({'type': 'image', 'data': msg.data}));
+            client.send(message);
           })
 
         }
