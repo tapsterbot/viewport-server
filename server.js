@@ -15,7 +15,7 @@ app.use(express.static('static'))
 
 function authorized(username, password) {
     const userMatches = basicAuth.safeCompare(username, 'user')
-    const passwordMatches = basicAuth.safeCompare(password, 'tapster')
+    const passwordMatches = basicAuth.safeCompare(password, 'tapster!')
 
     return userMatches & passwordMatches
 }
@@ -96,14 +96,14 @@ server.on('upgrade', function upgrade(request, socket, head) {
   const pathname = url.parse(request.url).pathname
 
   if (pathname === '/camera') {
-    console.log('Camera request auth: ' + request.headers.authorization)
+    console.log('Camera request auth...)
     wss_cam.handleUpgrade(request, socket, head, function done(ws) {
       wss_cam.emit('connection', ws, request)
     })
   } else if (pathname === '/viewer') {
 
     if (authHeader) {
-      console.log('Viewer request auth: ' + authHeader)
+      console.log('Viewer request auth...)
     }
     wss_view.handleUpgrade(request, socket, head, function done(ws) {
       wss_view.emit('connection', ws, request)
