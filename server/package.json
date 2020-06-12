@@ -1,12 +1,13 @@
 {
-  "name": "tapster-websocket-test",
+  "name": "tapster-viewport",
   "version": "1.0.0",
   "engines": {
     "node": "12.x"
   },
-  "description": "",
-  "main": "index.js",
+  "description": "Selenium for Robots?",
+  "main": "server.js",
   "scripts": {
+    "start" : "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jason R. Huggins",
@@ -14,6 +15,8 @@
   "dependencies": {
     "express": "^4.17.1",
     "express-basic-auth": "^1.2.0",
+    "knex": "^0.21.1",
+    "pg": "^8.2.1",
     "ws": "^7.3.0"
   }
 }
