@@ -20,7 +20,7 @@
     </style>
     <script>
       let HOST = location.origin.replace(/^http/, 'ws')
-      let ws = new WebSocket(HOST);
+      let ws = new WebSocket(HOST + '/viewer');
       let el;
 
       ws.onmessage = (event) => {
@@ -38,7 +38,7 @@
               if (msg.data.length != 0) {
                  imageElem.src = `data:image/jpeg;base64,${msg.data}`
               } else {
-                imageElem.src = ""
+                imageElem.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
               }
             }
           }
@@ -51,7 +51,7 @@
     </script>
   </head>
   <body>
-    <img id="live-stream" src="">
+    <img id="live-stream" src="data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=">
     <p id="server-time"></p>
   </body>
 </html>
