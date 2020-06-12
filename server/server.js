@@ -11,6 +11,11 @@ if ( (TVP_ACCESS_ID === undefined) || (TVP_ACCESS_PASSCODE === undefined) ) {
   return
 }
 
+const environment = process.env.NODE_ENV || 'staging';
+const configuration = require('./knexfile')[environment];
+const database = require('knex')(configuration);
+
+
 const PORT = process.env.PORT || 3000
 const INDEX = '/static/index.html'
 
@@ -28,7 +33,12 @@ function authorized(access_id, access_passcode) {
     return idMatches & passcodeMatches
 }
 
-const server = app.listen(PORT, () => console.log(`Listening on ${PORT}`))
+const server = app.listen(PORT, () => {
+  console.log(`Listening on ${PORT}`)
+  console.log('Environment: ' + environment);
+  database.raw("SELECT 'hello'::text as message;")
+           .then((data) => console.log(data.rows[0].message))
+})
 const wss_cam = new Server({ noServer: true })
 const wss_view = new Server({ noServer: true })
 
