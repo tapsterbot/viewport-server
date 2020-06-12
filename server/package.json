@@ -7,7 +7,7 @@
   "description": "Selenium for Robots?",
   "main": "server.js",
   "scripts": {
-    "start" : "node server.js",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Jason R. Huggins",
@@ -18,5 +18,8 @@
     "knex": "^0.21.1",
     "pg": "^8.2.1",
     "ws": "^7.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
   }
 }
