@@ -3,6 +3,14 @@ const basicAuth = require('express-basic-auth')
 const { Server } = require('ws')
 const url = require('url')
 
+const TVP_ACCESS_ID = process.env.TVP_ACCESS_ID
+const TVP_ACCESS_PASSCODE = process.env.TVP_ACCESS_PASSCODE
+
+if ( (TVP_ACCESS_ID === undefined) || (TVP_ACCESS_PASSCODE === undefined) ) {
+  console.log('Error: Missing environment variables (TVP_ACCESS_ID or TVP_ACCESS_PASSCODE)')
+  return
+}
+
 const PORT = process.env.PORT || 3000
 const INDEX = '/static/index.html'
 
@@ -13,14 +21,12 @@ app.use(basicAuth({
 }))
 app.use(express.static('static'))
 
-function authorized(username, password) {
-    const userMatches = basicAuth.safeCompare(username, 'user')
-    const passwordMatches = basicAuth.safeCompare(password, 'tapster!')
+function authorized(access_id, access_passcode) {
+    const idMatches = basicAuth.safeCompare(access_id, TVP_ACCESS_ID)
+    const passcodeMatches = basicAuth.safeCompare(access_passcode, TVP_ACCESS_PASSCODE)
 
-    return userMatches & passwordMatches
+    return idMatches & passcodeMatches
 }
-
-
 
 const server = app.listen(PORT, () => console.log(`Listening on ${PORT}`))
 const wss_cam = new Server({ noServer: true })
@@ -41,17 +47,12 @@ wss_cam.on('connection', (ws) => {
 
         else if (msg.type == 'image') {
           console.log('Received image from camera ')
-
           wss_view.clients.forEach((client) => {
             client.send(message)
             console.log('Sending image to viewer(s)')
           })
-
         }
-
-      } catch(err) {
-
-      }
+      } catch(err) {}
   })
 })
 
@@ -59,12 +60,6 @@ wss_view.on('connection', (ws) => {
   console.log('Viewer connected')
   console.log('Total # clients: ' + wss_view.clients.size)
 })
-
-setInterval(() => {
-  wss_view.clients.forEach((client) => {
-    client.send(JSON.stringify({'type': 'date', 'data': new Date().toTimeString()}))
-  })
-}, 1000)
 
 server.on('upgrade', function upgrade(request, socket, head) {
   var authHeader = request.headers.authorization
@@ -76,9 +71,9 @@ server.on('upgrade', function upgrade(request, socket, head) {
     return
   } else {
     try {
-      var username, password
-      [username, password] = Buffer.from(authHeader.split(' ')[1],'base64').toString().split(':')
-      if (!authorized(username, password)) {
+      var userid, passcode
+      [userid, passcode] = Buffer.from(authHeader.split(' ')[1],'base64').toString().split(':')
+      if (!authorized(userid, passcode)) {
         console.log('Denied connection request. Auth failed.')
         socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
         socket.destroy()
@@ -94,7 +89,6 @@ server.on('upgrade', function upgrade(request, socket, head) {
   }
 
   const pathname = url.parse(request.url).pathname
-
   if (pathname === '/camera') {
     console.log('Camera request auth...')
     wss_cam.handleUpgrade(request, socket, head, function done(ws) {
@@ -112,4 +106,10 @@ server.on('upgrade', function upgrade(request, socket, head) {
     socket.destroy()
   }
 })
+
+setInterval(() => {
+  wss_view.clients.forEach((client) => {
+    client.send(JSON.stringify({'type': 'date', 'data': new Date().toTimeString()}))
+  })
+}, 1000)
 
