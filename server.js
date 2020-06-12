@@ -96,14 +96,14 @@ server.on('upgrade', function upgrade(request, socket, head) {
   const pathname = url.parse(request.url).pathname
 
   if (pathname === '/camera') {
-    console.log('Camera request auth...)
+    console.log('Camera request auth...')
     wss_cam.handleUpgrade(request, socket, head, function done(ws) {
       wss_cam.emit('connection', ws, request)
     })
   } else if (pathname === '/viewer') {
 
     if (authHeader) {
-      console.log('Viewer request auth...)
+      console.log('Viewer request auth...')
     }
     wss_view.handleUpgrade(request, socket, head, function done(ws) {
       wss_view.emit('connection', ws, request)
