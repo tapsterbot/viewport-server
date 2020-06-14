@@ -2,6 +2,9 @@ const express = require('express')
 const basicAuth = require('express-basic-auth')
 const { Server } = require('ws')
 const url = require('url')
+const path = require('path')
+const session = require('express-session')
+const bodyParser = require('body-parser')
 
 const TVP_ACCESS_ID = process.env.TVP_ACCESS_ID
 const TVP_ACCESS_PASSCODE = process.env.TVP_ACCESS_PASSCODE
@@ -11,20 +14,35 @@ if ( (TVP_ACCESS_ID === undefined) || (TVP_ACCESS_PASSCODE === undefined) ) {
   return
 }
 
-const environment = process.env.NODE_ENV || 'staging';
-const configuration = require('./knexfile')[environment];
-const database = require('knex')(configuration);
-
+const environment = process.env.NODE_ENV || 'staging'
+const configuration = require('./config/knexfile')[environment]
+const database = require('knex')(configuration)
 
 const PORT = process.env.PORT || 3000
-const INDEX = '/static/index.html'
 
 const app = express()
+app.use(bodyParser.urlencoded({extended : true}))
+app.use(bodyParser.json())
 app.use(basicAuth({
-    authorizer: authorized,
-    challenge: true
+   authorizer: authorized,
+   challenge: true
 }))
-app.use(express.static('static'))
+
+app.get('/', function(request, response) {
+  response.sendFile(path.join(__dirname + '/views/login.html'))
+})
+
+app.get('/view', function(request, response) {
+  response.sendFile(path.join(__dirname + '/views/viewer.html'))
+})
+
+function requireLogin (req, res, next) {
+  if (!req.user) {
+    res.redirect('/')
+  } else {
+    next()
+  }
+}
 
 function authorized(access_id, access_passcode) {
     const idMatches = basicAuth.safeCompare(access_id, TVP_ACCESS_ID)
