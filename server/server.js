@@ -1,5 +1,6 @@
 const express = require('express')
 const path = require('path')
+const helmet = require('helmet')
 const session = require('express-session')
 const KnexSessionStore = require('connect-session-knex')(session)
 const bodyParser = require('body-parser')
@@ -17,6 +18,7 @@ const TVP_ACCESS_ID = process.env.TVP_ACCESS_ID
 const TVP_ACCESS_PASSCODE = process.env.TVP_ACCESS_PASSCODE
 const SESSION_SECRET = process.env.SESSION_SECRET
 
+// Exit if environment variables are not set
 if ( (TVP_ACCESS_ID === undefined) ||
      (TVP_ACCESS_PASSCODE === undefined) ||
      (SESSION_SECRET === undefined) ) {
@@ -28,7 +30,6 @@ if ( (TVP_ACCESS_ID === undefined) ||
 const environment = process.env.NODE_ENV || 'staging'
 const configuration = require('./config/knexfile')[environment]
 const database = require('knex')(configuration)
-
 const store = new KnexSessionStore({
   knex: database,
   createtable: true,
@@ -37,8 +38,7 @@ const store = new KnexSessionStore({
 
 // Server set-up
 const app = express()
-app.use(express.static(path.join(__dirname, 'public')))
-
+app.use(helmet())
 var sess = {
     secret: SESSION_SECRET,
     cookie: {
@@ -49,20 +49,18 @@ var sess = {
     resave: false,
     saveUninitialized: false
 }
-
 if (app.get('env') === 'production') {
   console.log('Enabling production cookie settings')
   app.set('trust proxy', 1) // trust first proxy
   sess.cookie.secure = true // serve secure cookies
 }
-
 app.use(session(sess))
+app.use(express.static(path.join(__dirname, 'public')))
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 app.locals.store = store
 app.use(bodyParser.urlencoded({extended : true}))
 app.use(bodyParser.json())
-
 app.use('/', indexRouter)
 app.use('/auth', authRouter)
 app.use('/home', requireSignIn, homeRouter)
