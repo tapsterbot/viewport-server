@@ -4,7 +4,7 @@ const router = express.Router()
 router.get('/', function(req, res, next) {
 
   if (req.session.authenticated) {
-    console.log('Already authenticated.')
+    console.log('User authenticated')
     res.render('home', {username: req.session.username})
     return
   }

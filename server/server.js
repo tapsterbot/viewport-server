@@ -51,6 +51,7 @@ var sess = {
 }
 
 if (app.get('env') === 'production') {
+  console.log('Enabling production cookie settings')
   app.set('trust proxy', 1) // trust first proxy
   sess.cookie.secure = true // serve secure cookies
 }
