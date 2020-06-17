@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Tapster Viewport</title>
+    <style>
+    html {
+      width: 325px;
+      margin: 0 auto;
+      font-family: Tahoma, Geneva, sans-serif;
+    }
+    h1 {
+      text-align: center;
+      color: #4d4d4d;
+      font-size: 24px;
+      padding: 20px 0 20px 0;
+    }
+    .sign-in-form {
+      border-style: solid;
+      border-width: 1px;
+      border-color: gray;
+      padding: 10px 10px 10px 10px;
+    }
+    .sign-in-form p {
+      border-style: solid;
+      border-width: 1px;
+      border-color: #D3D3D3;
+      background: #fffdf2;
+      padding: 8px 8px 8px 8px;
+      margin: 0px 0px 10px 0px;
+      font-size: 14px;
+    }
+    .sign-in-form input[type="password"],
+    .sign-in-form input[type="text"] {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #dddddd;
+      margin-bottom: 15px;
+      box-sizing:border-box;
+    }
+    .sign-in-form input[type="submit"] {
+      width: 100%;
+      padding: 15px;
+      background-color: #535b63;
+      border: 0;
+      box-sizing: border-box;
+      cursor: pointer;
+      font-weight: bold;
+      color: #ffffff;
+    }
+    </style>
+  </head>
+  <body>
+      <h1>Tapster Viewport</h1>
+      <div class="sign-in-form">
+        <% if (error) { %>
+          <p>Hmm, that didn’t work. Please try again.</p>
+        <% } %>
+        <form action="auth/sign-in" method="POST">
+          <input type="text" name="username" placeholder="Username" autofocus required>
+          <input type="password" name="password" placeholder="Password" required>
+          <input type="submit">
+        </form>
+    </div>
+  </body>
+</html>

@@ -1,143 +1,77 @@
 const express = require('express')
-const basicAuth = require('express-basic-auth')
-const { Server } = require('ws')
-const url = require('url')
 const path = require('path')
 const session = require('express-session')
+const KnexSessionStore = require('connect-session-knex')(session)
 const bodyParser = require('body-parser')
+const requireSignIn = require('./controllers/utils/requireSignIn')
 
+// Get routes
+var indexRouter = require('./routes/index')
+var authRouter = require('./routes/auth')
+var homeRouter = require('./routes/home')
+var viewRouter = require('./routes/view')
+
+// Get environment variables
+const PORT = process.env.PORT || 3000
 const TVP_ACCESS_ID = process.env.TVP_ACCESS_ID
 const TVP_ACCESS_PASSCODE = process.env.TVP_ACCESS_PASSCODE
+const SESSION_SECRET = process.env.SESSION_SECRET
 
-if ( (TVP_ACCESS_ID === undefined) || (TVP_ACCESS_PASSCODE === undefined) ) {
-  console.log('Error: Missing environment variables (TVP_ACCESS_ID or TVP_ACCESS_PASSCODE)')
+if ( (TVP_ACCESS_ID === undefined) ||
+     (TVP_ACCESS_PASSCODE === undefined) ||
+     (SESSION_SECRET === undefined) ) {
+  console.log('Error: Missing environment variables!')
   return
 }
 
+// Database set-up
 const environment = process.env.NODE_ENV || 'staging'
 const configuration = require('./config/knexfile')[environment]
 const database = require('knex')(configuration)
 
-const PORT = process.env.PORT || 3000
+const store = new KnexSessionStore({
+  knex: database,
+  createtable: false,
+  tablename: 'sessions'
+})
 
+// Server set-up
 const app = express()
+app.use(express.static(path.join(__dirname, 'public')))
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    cookie: {
+      maxAge: 10000 * 60, // 60 seconds, for testing
+      httpOnly: false
+    },
+    store,
+    resave: false,
+    saveUninitialized: false
+  })
+)
+
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'ejs')
+app.locals.store = store
 app.use(bodyParser.urlencoded({extended : true}))
 app.use(bodyParser.json())
-app.use(basicAuth({
-   authorizer: authorized,
-   challenge: true
-}))
 
-app.get('/', function(request, response) {
-  response.sendFile(path.join(__dirname + '/views/login.html'))
-})
+app.use('/', indexRouter)
+app.use('/auth', authRouter)
+app.use('/home', requireSignIn, homeRouter)
+app.use('/view', requireSignIn, viewRouter)
 
-app.get('/view', function(request, response) {
-  response.sendFile(path.join(__dirname + '/views/viewer.html'))
-})
+var server = require('http').createServer(app)
+var wsServer = require('./controllers/websocket')(server, app)
 
-function requireLogin (req, res, next) {
-  if (!req.user) {
-    res.redirect('/')
-  } else {
-    next()
-  }
-}
-
-function authorized(access_id, access_passcode) {
-    const idMatches = basicAuth.safeCompare(access_id, TVP_ACCESS_ID)
-    const passcodeMatches = basicAuth.safeCompare(access_passcode, TVP_ACCESS_PASSCODE)
-
-    return idMatches & passcodeMatches
-}
-
-const server = app.listen(PORT, () => {
+server.listen(PORT, () => {
+  console.log('Environment: ' + environment)
   console.log(`Listening on ${PORT}`)
-  console.log('Environment: ' + environment);
-  database.raw("SELECT 'hello'::text as message;")
-           .then((data) => console.log(data.rows[0].message))
-})
-const wss_cam = new Server({ noServer: true })
-const wss_view = new Server({ noServer: true })
-
-wss_cam.on('connection', (ws) => {
-  console.log('Camera connected')
-  console.log('Total # cameras: ' + wss_cam.clients.size)
-  ws.on('close', () => console.log('Client disconnected'))
-
-  ws.on('message', function incoming(message) {
-      try {
-        var msg = JSON.parse(message)
-
-        if (msg.type == 'message') {
-          console.log('Received Message: ' + msg.data)
-        }
-
-        else if (msg.type == 'image') {
-          console.log('Received image from camera ')
-          wss_view.clients.forEach((client) => {
-            client.send(message)
-            console.log('Sending image to viewer(s)')
-          })
-        }
-      } catch(err) {}
-  })
+  database.raw("SELECT 'Connected to database'::text as message;")
+    .then((data) => console.log(data.rows[0].message))
 })
 
-wss_view.on('connection', (ws) => {
-  console.log('Viewer connected')
-  console.log('Total # clients: ' + wss_view.clients.size)
-})
 
-server.on('upgrade', function upgrade(request, socket, head) {
-  var authHeader = request.headers.authorization
 
-  if (!authHeader) {
-    console.log('Denied connection request. No auth header')
-    socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
-    socket.destroy()
-    return
-  } else {
-    try {
-      var userid, passcode
-      [userid, passcode] = Buffer.from(authHeader.split(' ')[1],'base64').toString().split(':')
-      if (!authorized(userid, passcode)) {
-        console.log('Denied connection request. Auth failed.')
-        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n')
-        socket.destroy()
-        return
-      }
-    } catch(err) {
-      console.log('Denied connection request. Server Error.')
-      console.log(err)
-      socket.write('HTTP/1.1 500 Internal Server Error\r\n\r\n')
-      socket.destroy()
-      return
-    }
-  }
-
-  const pathname = url.parse(request.url).pathname
-  if (pathname === '/camera') {
-    console.log('Camera request auth...')
-    wss_cam.handleUpgrade(request, socket, head, function done(ws) {
-      wss_cam.emit('connection', ws, request)
-    })
-  } else if (pathname === '/viewer') {
-
-    if (authHeader) {
-      console.log('Viewer request auth...')
-    }
-    wss_view.handleUpgrade(request, socket, head, function done(ws) {
-      wss_view.emit('connection', ws, request)
-    })
-  } else {
-    socket.destroy()
-  }
-})
-
-setInterval(() => {
-  wss_view.clients.forEach((client) => {
-    client.send(JSON.stringify({'type': 'date', 'data': new Date().toTimeString()}))
-  })
-}, 1000)
 

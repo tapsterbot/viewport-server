@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Tapster Viewport · Camera Viewer</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/bootstrap-4.5.0-dist/css/bootstrap.css" rel="stylesheet">
+    <style>
+      p {
+        margin-left: 5px;
+        margin-top: 10px;
+        font-family: Tahoma, Geneva, sans-serif;
+        font-size: 8pt;
+        font-weight: 500;
+        text-align: left;
+      }
+    </style>
+    <script>
+      let HOST = location.origin.replace(/^http/, 'ws')
+      let ws = new WebSocket(HOST + '/viewer')
+      let el
+      ws.onmessage = (event) => {
+        try {
+          var msg = JSON.parse(event.data)
+
+          if (msg.type == 'date') {
+            console.log('Received Date: ' + msg.data)
+            el = document.getElementById('server-time')
+            el.innerHTML = 'Server time: ' + msg.data
+          }
+          else if (msg.type == 'image') {
+            imageElem = document.getElementById('live-stream')
+            if (imageElem) {
+              if (msg.data.length != 0) {
+                 imageElem.src = `data:image/jpeg;base64,${msg.data}`
+              } else {
+                imageElem.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+              }
+            }
+          }
+        } catch(err) {
+        }
+      }
+    </script>
+    <script>
+      var elem;
+      function openFullscreen() {
+        var elem = document.getElementById("live-stream")
+        if (elem.requestFullscreen) {
+          elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen) { /* Firefox */
+          elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+          elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) { /* IE/Edge */
+          elem.msRequestFullscreen();
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark">
+      <a class="navbar-brand" href="/"><img src="/image/video-white.svg" width=35 height=35></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample01" aria-controls="navbarsExample01" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse text-right" id="navbarsExample01">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/view">Cameras</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/auth/sign-out">Sign out</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    <div class="container-fluid p-0">
+        <div class="row">
+          <img class="img-fluid w-100" onclick="openFullscreen()" id="live-stream" src="data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=">
+        </div>
+        <div class="row">
+          <p class="live-stream col-12" id="server-time"></p>
+         </div>
+    </div>
+
+    <script src="/js/jquery-3.5.1.js"></script>
+    <script src="/bootstrap-4.5.0-dist/js/bootstrap.bundle.js"></script>
+  </body>
+</html>
