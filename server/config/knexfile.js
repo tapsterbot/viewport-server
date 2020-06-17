@@ -5,8 +5,14 @@ module.exports = {
   development: {
     client: 'sqlite3',
     connection: {
-      filename: 'dev.sqlite3'
-    }
+      filename: './db/dev.sqlite3'
+    },
+    migrations: {
+      directory: '../db/migrations',
+      tableName: 'knex_migrations'
+    },
+    useNullAsDefault: true,
+    connectionCheck: "SELECT 'Connected to development database' as message;"
   },
 
   staging: {
@@ -22,7 +28,9 @@ module.exports = {
     migrations: {
       directory: '../db/migrations',
       tableName: 'knex_migrations'
-    }
+    },
+    useNullAsDefault: true,
+    connectionCheck: "SELECT 'Connected to staging database' as message;"
   },
 
   production: {
@@ -35,7 +43,9 @@ module.exports = {
     migrations: {
       directory: '../db/migrations',
       tableName: 'knex_migrations'
-    }
+    },
+    useNullAsDefault: true,
+    connectionCheck: "SELECT 'Connected to production database' as message;"
   }
 
 }

@@ -31,26 +31,31 @@ const database = require('knex')(configuration)
 
 const store = new KnexSessionStore({
   knex: database,
-  createtable: false,
+  createtable: true,
   tablename: 'sessions'
 })
 
 // Server set-up
 const app = express()
 app.use(express.static(path.join(__dirname, 'public')))
-app.use(
-  session({
+
+var sess = {
     secret: SESSION_SECRET,
     cookie: {
       maxAge: 10000 * 60, // 60 seconds, for testing
-      httpOnly: false
+      httpOnly: true
     },
     store,
     resave: false,
     saveUninitialized: false
-  })
-)
+}
 
+if (app.get('env') === 'production') {
+  app.set('trust proxy', 1) // trust first proxy
+  sess.cookie.secure = true // serve secure cookies
+}
+
+app.use(session(sess))
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 app.locals.store = store
@@ -68,8 +73,17 @@ var wsServer = require('./controllers/websocket')(server, app)
 server.listen(PORT, () => {
   console.log('Environment: ' + environment)
   console.log(`Listening on ${PORT}`)
-  database.raw("SELECT 'Connected to database'::text as message;")
-    .then((data) => console.log(data.rows[0].message))
+  database.raw(configuration.connectionCheck)
+    .then((data) => {
+      if (data.rows) { // PostgreSQL
+        console.log(data.rows[0].message)
+      } else { // SQLite3
+        console.log(data[0].message)
+      }
+    })
+    .catch(function(err) {
+      console.error(err);
+    })
 })
 
 
