@@ -37,11 +37,10 @@ module.exports = {
     client: 'pg',
     connection: {
       connectionString : process.env.DATABASE_URL,
-      ssl: true
-    },
-    ssl: { 
+      ssl: { 
         rejectUnauthorized: false 
-    }, 
+      } 
+    },
     pool: {
       min: 2,
       max: 10
