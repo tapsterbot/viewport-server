@@ -1,5 +1,5 @@
 {
-  "description": "This file is required for running on Heroku",
+  "description": "This file is required for running on Heroku.",
   "scripts": {
     "postinstall": "npm install --prefix server",
     "start": "npm start --prefix server"
