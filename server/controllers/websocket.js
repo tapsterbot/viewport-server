@@ -4,6 +4,9 @@ var checkBasicAuth = require('./utils/basicAuthCheck')
 var checkValidSession = require('./utils/sessionAuthCheck')
 
 const wss_cam = new Server({ noServer: true })
+//wss_cam.bytesCount = 0;
+//wss_cam.start = 0;
+
 const wss_view = new Server({ noServer: true })
 
 function deny(socket) {
@@ -29,8 +32,17 @@ module.exports = function(server, app) {
 
             else if (msg.type == 'image') {
               console.log('Received image from camera ')
+
+              //wss_cam.bytesCount += msg.data.length
+              //console.log('Data Count: ' + (wss_cam.bytesCount/1000000).toFixed(2) + 'MB')
+              //console.log('Duration: ' + ( (Date.now() / 1000) -  wss_cam.start).toFixed(2) )
+              ///if (((Date.now() / 1000) -  wss_cam.start) > 60 ) {
+              //  console.log('MB/min: ' + (wss_cam.bytesCount/1000000).toFixed(2))
+              //  wss_cam.start = Date.now() / 1000;
+              //}
+
               wss_view.clients.forEach((client) => {
-                client.send(message)
+                client.send(message.toString())
                 console.log('Sending image to viewer(s)')
               })
             }

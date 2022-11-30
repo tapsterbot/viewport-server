@@ -2,8 +2,8 @@
   "name": "tapster-viewport",
   "version": "1.0.0",
   "engines": {
-    "node": "12.x",
-    "npm": "6.x"
+    "node": "16.*",
+    "npm": "8.*"
   },
   "description": "Selenium for Robots?",
   "main": "server.js",
@@ -14,19 +14,19 @@
   "author": "Jason R. Huggins",
   "license": "MIT",
   "dependencies": {
-    "connect-session-knex": "^1.7.2",
-    "cookie": "^0.4.1",
-    "ejs": "^3.1.3",
-    "express": "^4.17.1",
-    "express-basic-auth": "^1.2.0",
-    "express-session": "^1.17.1",
-    "helmet": "^3.23.1",
-    "knex": "<0.21.1",
-    "pg": "^8.2.1",
-    "ws": "^7.3.0"
+    "connect-session-knex": "^3.0.0",
+    "cookie": "^0.5.0",
+    "ejs": "^3.1.8",
+    "express": "^4.18.2",
+    "express-basic-auth": "^1.2.1",
+    "express-session": "^1.17.3",
+    "helmet": "^6.0.1",
+    "knex": "^2.3.0",
+    "pg": "^8.8.0",
+    "ws": "^8.11.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.4",
-    "sqlite3": "^4.2.0"
+    "nodemon": "^2.0.20",
+    "sqlite3": "^5.1.2"
   }
 }
