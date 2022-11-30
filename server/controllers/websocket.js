@@ -82,6 +82,11 @@ module.exports = function(server, app) {
             deny(socket)
           }
         })
+      } else if (pathname === '/viewer2') {
+        // FIXME: This is a test. A dangerous test. Add back auth as soon as possible.
+        wss_view.handleUpgrade(request, socket, head, function done(ws) {
+          wss_view.emit('connection', ws, request)
+        })
       } else {
         socket.destroy()
       }

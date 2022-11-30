@@ -11,6 +11,7 @@ var indexRouter = require('./routes/index')
 var authRouter = require('./routes/auth')
 var homeRouter = require('./routes/home')
 var viewRouter = require('./routes/view')
+var viewRouter2 = require('./routes/view2')
 
 // Get environment variables
 const PORT = process.env.PORT || 3000
@@ -65,6 +66,7 @@ app.use('/', indexRouter)
 app.use('/auth', authRouter)
 app.use('/home', requireSignIn, homeRouter)
 app.use('/view', requireSignIn, viewRouter)
+app.use('/view2', viewRouter2)
 
 var server = require('http').createServer(app)
 var wsServer = require('./controllers/websocket')(server, app)
