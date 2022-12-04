@@ -20,7 +20,15 @@ module.exports = function(server, app) {
     wss_cam.on('connection', (ws) => {
       console.log('Camera connected')
       console.log('Total # cameras: ' + wss_cam.clients.size)
-      ws.on('close', () => console.log('Client disconnected'))
+      ws.on('close', () => {
+        console.log('Camera disconnected')
+
+        wss_view.clients.forEach((client) => {
+          client.send(JSON.stringify({'type': 'image', 'data': ""}))
+          console.log('Sending empty to viewer(s)')
+        })
+
+      })
 
       ws.on('message', function incoming(message) {
           try {
@@ -53,13 +61,40 @@ module.exports = function(server, app) {
     wss_view.on('connection', (ws) => {
       console.log('Viewer connected')
       console.log('Total # clients: ' + wss_view.clients.size)
+
+      ws.on('message', function incoming(message) {
+        console.log('Got message from viewer')
+        console.log(message.toString())
+        wss_cam.clients.forEach((client) => {
+          console.log('Sending message to camera(s)')
+          var msgData = message.toString()
+          client.send(JSON.stringify({'type': 'message', 'data': msgData}))
+        })
+      })
     })
 
     setInterval(() => {
+      // Send heartbeat to viewers
       wss_view.clients.forEach((client) => {
         client.send(JSON.stringify({'type': 'date', 'data': new Date().toTimeString()}))
       })
+
+      // Send note to camera that a viewer connected
+      wss_cam.clients.forEach((client) => {
+        var message = {'viewers-connected': wss_view.clients.size}
+        client.send(JSON.stringify({'type': 'message', 'data': message}))
+      })
+
     }, 1000)
+
+    setInterval(() => {
+      // Send note to camera that a viewer connected
+      wss_cam.clients.forEach((client) => {
+        var message = {'viewers-connected': wss_view.clients.size}
+        client.send(JSON.stringify({'type': 'message', 'data': message}))
+      })
+
+    }, 500)
 
     server.on('upgrade', function upgrade(request, socket, head) {
       const pathname = url.parse(request.url).pathname
