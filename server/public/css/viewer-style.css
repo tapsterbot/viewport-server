@@ -15,7 +15,7 @@ html, body {
 
 #live-stream {
   /* aspect-ratio: 720 / 1280; */
-  aspect-ratio: 1280 / 720;
+  /* aspect-ratio: 1280 / 720; */
   max-width:100%;
   height:auto;
   max-height:100%;  
