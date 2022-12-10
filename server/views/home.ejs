@@ -13,7 +13,7 @@
   <body>
     <nav class="navbar navbar-expand-xl navbar-dark bg-dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="/">
           <img src="/image/video-white.svg" width=35 height=35 class="d-inline-block align-top" alt="Viewport" loading="lazy">
         </a>
         <button class="navbar-toggler"
@@ -27,7 +27,7 @@
         <div class="collapse navbar-collapse text-end" id="navbarSupportedContent2">
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <a class="nav-link active" href="/view">Live View</a>
+              <a class="nav-link" href="/view">Live View</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="/auth/sign-out">Sign out</a>
@@ -43,8 +43,8 @@
     <div class="jumbotron">
       <div class="col-sm-9 mx-auto">
         <h1>Yeah! Hi, <%= username %>!</h1>
-        <p>Welcome to Viewport.</p>
-        <p>Use it to view and control robots remotely over the internet.</p>
+        <h4>Welcome to Viewport</h4>
+        <p>Use Viewport to view and control robots remotely over the internet.</p>
         <p>
           <a class="btn btn-primary" href="/view" role="button">View a robot now &raquo;</a>
         </p>
