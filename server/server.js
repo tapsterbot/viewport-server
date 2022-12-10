@@ -39,7 +39,7 @@ const store = new KnexSessionStore({
 
 // Server set-up
 const app = express()
-app.use(helmet())
+//app.use(helmet())
 var sess = {
     secret: SESSION_SECRET,
     cookie: {
