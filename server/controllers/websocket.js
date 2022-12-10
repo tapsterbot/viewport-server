@@ -24,8 +24,8 @@ module.exports = function(server, app) {
         console.log('Camera disconnected')
 
         wss_view.clients.forEach((client) => {
-          client.send(JSON.stringify({'type': 'image', 'data': ""}))
           console.log('Sending empty to viewer(s)')
+          client.send(JSON.stringify({'type': 'image', 'data': ""}))
         })
 
       })
@@ -39,7 +39,7 @@ module.exports = function(server, app) {
             }
 
             else if (msg.type == 'image') {
-              console.log('Received image from camera ')
+              //console.log('Received image from camera ')
 
               //wss_cam.bytesCount += msg.data.length
               //console.log('Data Count: ' + (wss_cam.bytesCount/1000000).toFixed(2) + 'MB')
@@ -51,7 +51,7 @@ module.exports = function(server, app) {
 
               wss_view.clients.forEach((client) => {
                 client.send(message.toString())
-                console.log('Sending image to viewer(s)')
+                //console.log('Sending image to viewer(s)')
               })
             }
           } catch(err) {}
@@ -68,7 +68,9 @@ module.exports = function(server, app) {
         wss_cam.clients.forEach((client) => {
           console.log('Sending message to camera(s)')
           var msgData = message.toString()
-          client.send(JSON.stringify({'type': 'message', 'data': msgData}))
+          console.log(msgData)
+          //client.send(JSON.stringify({'type': 'message', 'data': msgData}))
+          client.send(msgData)
         })
       })
     })
