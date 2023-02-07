@@ -18,10 +18,10 @@ function deny(socket) {
 module.exports = function(server, app) {
   if (server) {
     wss_cam.on('connection', (ws) => {
-      console.log('Camera connected')
-      console.log('Total # cameras: ' + wss_cam.clients.size)
+      console.log('Agent connected')
+      console.log('Total # agents: ' + wss_cam.clients.size)
       ws.on('close', () => {
-        console.log('Camera disconnected')
+        console.log('Agent disconnected')
 
         wss_view.clients.forEach((client) => {
           console.log('Sending empty to viewer(s)')
@@ -39,7 +39,7 @@ module.exports = function(server, app) {
             }
 
             else if (msg.type == 'image') {
-              //console.log('Received image from camera ')
+              //console.log('Received image from agent ')
 
               //wss_cam.bytesCount += msg.data.length
               //console.log('Data Count: ' + (wss_cam.bytesCount/1000000).toFixed(2) + 'MB')
@@ -66,7 +66,7 @@ module.exports = function(server, app) {
         console.log('Got message from viewer')
         console.log(message.toString())
         wss_cam.clients.forEach((client) => {
-          console.log('Sending message to camera(s)')
+          console.log('Sending message to agent(s)')
           var msgData = message.toString()
           console.log(msgData)
           //client.send(JSON.stringify({'type': 'message', 'data': msgData}))
@@ -81,7 +81,7 @@ module.exports = function(server, app) {
         client.send(JSON.stringify({'type': 'date', 'data': new Date().toTimeString()}))
       })
 
-      // Send note to camera that a viewer connected
+      // Send note to agent that a viewer connected
       wss_cam.clients.forEach((client) => {
         var message = {'viewers-connected': wss_view.clients.size}
         client.send(JSON.stringify({'type': 'message', 'data': message}))
@@ -90,7 +90,7 @@ module.exports = function(server, app) {
     }, 1000)
 
     setInterval(() => {
-      // Send note to camera that a viewer connected
+      // Send note to agent that a viewer connected
       wss_cam.clients.forEach((client) => {
         var message = {'viewers-connected': wss_view.clients.size}
         client.send(JSON.stringify({'type': 'message', 'data': message}))
@@ -102,7 +102,7 @@ module.exports = function(server, app) {
       const pathname = url.parse(request.url).pathname
       if (pathname === '/camera') {
         if (checkBasicAuth(request, socket)) {
-          console.log('Camera authenticated')
+          console.log('Agent authenticated')
           wss_cam.handleUpgrade(request, socket, head, function done(ws) {
             wss_cam.emit('connection', ws, request)
           })
