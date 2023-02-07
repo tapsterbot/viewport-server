@@ -4,6 +4,20 @@ let ws = new WebSocket(HOST + '/viewer2')
 let el
 let lastPositionTime = new Date().getTime()
 
+var orientation = {
+  "portrait": {
+    x: 768,
+    y: 1024
+  },
+  "landscape": {
+    x: 1024,
+    y: 768
+  }
+}
+
+var shiftIsDown = false;
+var selectingRegion = false;
+
 ws.onmessage = (event) => {
   try {
 
@@ -15,7 +29,7 @@ ws.onmessage = (event) => {
       //el.innerHTML = 'Server time: ' + msg.data
     }
     else if (msg.type == 'image') {
-      imageElem = document.getElementById('live-stream')
+      var imageElem = document.getElementById('live-stream')
       if (imageElem) {
         if (msg.data.length != 0) {
            imageElem.src = `data:image/jpeg;base64,${msg.data}`
@@ -32,41 +46,100 @@ ws.onmessage = (event) => {
 var liveStreamImg = document.getElementById("live-stream")
 
 function getMousePos(evt, wait = true) {
-  console.log(wait)
+  //console.log(wait)
+  var currentOrientation = orientation["portrait"]
   var pos = null
   let now = new Date().getTime()
-  if (now - lastPositionTime > 200) { // 200 ms
+  if (now - lastPositionTime > 100) { // 100 ms
     lastPositionTime = now
 
     var rect = liveStreamImg.getBoundingClientRect()
-
+    if (rect.width > rect.height) {
+      var currentOrientation = orientation["landscape"]
+    }
     pos = {
        //x: Math.round((evt.clientX - rect.left) / (rect.right - rect.left) * liveStreamImg.naturalWidth),
        //y: Math.round((evt.clientY - rect.top) / (rect.bottom - rect.top) * liveStreamImg.naturalHeight)
-       x: Math.round((evt.clientX - rect.left) / (rect.right - rect.left) * 768),
-       y: Math.round((evt.clientY - rect.top) / (rect.bottom - rect.top) * 1024)
+       x: Math.round((evt.clientX - rect.left) / (rect.right - rect.left) * currentOrientation.x),
+       y: Math.round((evt.clientY - rect.top) / (rect.bottom - rect.top) * currentOrientation.y)
     }
-    if (pos.x < 768 && pos.y < 1024) {
+    if (pos.x < currentOrientation.x && pos.y < currentOrientation.y) {
       console.log(pos.x, pos.y)
       return pos
     }
   }
 }
 
-function sendMouseMove(evt) {
-  var pos = getMousePos(evt, true)
+function onMouseMove(evt) {
+  var pos = getMousePos(evt, false)
   if (pos) {
     ws.send(JSON.stringify({'type': 'mouseMove', 'data': {x:pos.x, y:pos.y}}))
   }
+
+  var yo = document.getElementById('yo')
+  console.log('selectingRegion: ', selectingRegion)
+  if (!selectingRegion) {
+    yo.style.left = (evt.clientX - 10) + 'px';
+    yo.style.top = (evt.clientY - 10) + 'px';
+  } else {
+    //yo.style.width = 50 + 'px';
+    //yo.style.height = 50 + 'px';
+    var left = yo.style.left.split('px')[0]
+    var top = yo.style.top.split('px')[0]
+    yo.style.setProperty("--width", (evt.clientX - left) + 'px');
+    yo.style.setProperty("--height", (evt.clientY - top) + 'px');
+
+    console.log('yo.style.left:', yo.style.left)
+    console.log('evt.clientX:', evt.clientX)
+  }
+
 }
 
-function sendMouseUp(evt) {
-  var pos = getMousePos(evt, false)
-  if (pos) {
-    ws.send(JSON.stringify({'type': 'mouseUp', 'data': {x:pos.x, y:pos.y}}))
+function onMouseDown(evt) {
+  if (shiftIsDown) { // shift
+    selectingRegion = true
   }
 }
 
+function onMouseUp(evt) {
+  if (!shiftIsDown) {
+    if (!selectingRegion) {
+      var pos = getMousePos(evt, false)
+      if (pos) {
+        ws.send(JSON.stringify({'type': 'mouseUp', 'data': {x:pos.x, y:pos.y}}))
+      }
+    }
+  }
+  selectingRegion = false
+}
 
-window.addEventListener('mousemove', sendMouseMove, false);
-window.addEventListener('mouseup', sendMouseUp, false);
+
+
+function onKeyDown(evt) {
+  var imageElem = document.getElementById('live-stream')
+  var yo = document.getElementById('yo')
+  if (evt.keyCode == 16) { // shift
+    shiftIsDown = true;
+    //imageElem.classList.add('dim')
+    yo.classList.add('overlay')
+  }
+}
+
+function onKeyUp(evt) {
+  var imageElem = document.getElementById('live-stream')
+  var yo = document.getElementById('yo')
+  if (evt.keyCode == 16) { // shift
+    shiftIsDown = false;
+    //imageElem.classList.remove('dim')
+    yo.classList.remove('overlay')
+    yo.style.setProperty("--width",  '20px');
+    yo.style.setProperty("--height", '20px');
+  }
+}
+
+//document.addEventListener("keypress", onKeyPress)
+document.addEventListener("keydown", onKeyDown)
+document.addEventListener("keyup", onKeyUp)
+window.addEventListener('mousemove', onMouseMove, false)
+window.addEventListener('mouseup', onMouseUp, false)
+window.addEventListener('mousedown', onMouseDown, false)
