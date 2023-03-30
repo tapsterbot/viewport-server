@@ -66,7 +66,7 @@ app.use('/', indexRouter)
 app.use('/auth', authRouter)
 app.use('/home', requireSignIn, homeRouter)
 app.use('/view', requireSignIn, viewRouter)
-app.use('/view2', viewRouter2)
+app.use('/view2', requireSignIn, viewRouter2)
 
 var server = require('http').createServer(app)
 var wsServer = require('./controllers/websocket')(server, app)
