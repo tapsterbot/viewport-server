@@ -15,6 +15,7 @@ var orientation = {
   }
 }
 
+var mouseDrag = false;
 var shiftIsDown = false;
 var selectingRegion = false;
 
@@ -71,9 +72,10 @@ function getMousePos(evt, wait = true) {
 }
 
 function onMouseMove(evt) {
+  mouseDrag = true;
   var pos = getMousePos(evt, false)
   if (pos) {
-    ws.send(JSON.stringify({'type': 'mouseMove', 'data': {x:pos.x, y:pos.y}}))
+    ws.send(JSON.stringify({'type': 'mouseMove', 'data': {x:pos.x, y:pos.y}, 'drag': mouseDrag}))
   }
 
   var yo = document.getElementById('yo')
@@ -96,17 +98,24 @@ function onMouseMove(evt) {
 }
 
 function onMouseDown(evt) {
+  mouseDrag = false
   if (shiftIsDown) { // shift
     selectingRegion = true
+  }
+  var pos = getMousePos(evt, false)
+  console.log('Down position: ' + pos.x + ',' + pos.y)
+  if (pos) {
+    ws.send(JSON.stringify({'type': 'mouseDown', 'data': {x:pos.x, y:pos.y}}))
   }
 }
 
 function onMouseUp(evt) {
+  mouseDrag = false
   if (!shiftIsDown) {
     if (!selectingRegion) {
       var pos = getMousePos(evt, false)
       if (pos) {
-        ws.send(JSON.stringify({'type': 'mouseUp', 'data': {x:pos.x, y:pos.y}}))
+        ws.send(JSON.stringify({'type': 'mouseUp', 'data': {x:pos.x, y:pos.y}, 'drag': mouseDrag}))
       }
     }
   }
