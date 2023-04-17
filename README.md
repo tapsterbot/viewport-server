@@ -22,5 +22,21 @@ List available versions:
     
 ## Install Viewport Server
 
-    cd server
+    git clone https://github.com/tapsterbot/viewport-server.git
+    cd viewport-server/server
     npm install
+
+## Edit Environment Variables
+
+    vim config/env-vars.sh
+    
+    export NODE_ENV=development
+    #export NODE_ENV=staging
+    export SESSION_SECRET=super-secret  # CHANGEME
+    export TVP_ACCESS_ID=tapster        # CHANGEME
+    export TVP_ACCESS_PASSCODE=tapster  # CHANGEME
+    
+## Run Viewport Server
+
+    source config/env-vars.sh
+    npm start 
