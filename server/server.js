@@ -24,6 +24,8 @@ if ( (TVP_ACCESS_ID === undefined) ||
      (TVP_ACCESS_PASSCODE === undefined) ||
      (SESSION_SECRET === undefined) ) {
   console.log('Error: Missing environment variables!')
+  console.log('  From the terminal, run this:\n')
+  console.log('  source config/env-vars.sh\n')
   return
 }
 
