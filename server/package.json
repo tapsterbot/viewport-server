@@ -2,8 +2,8 @@
   "name": "tapster-viewport",
   "version": "1.0.0",
   "engines": {
-    "node": "16.*",
-    "npm": "8.*"
+    "node": "18.*",
+    "npm": "9.*"
   },
   "description": "Selenium for Robots?",
   "main": "server.js",
